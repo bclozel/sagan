@@ -9,10 +9,6 @@ inputs:
 - name: sagan-repo
 outputs:
 - name: build
-params:
-  # JSPM github authentication is needed for the CI
-  # otherwise install steps reach github API limitation
-  JSPM_GITHUB_AUTH_TOKEN:
 run:
   user: root
   path: /bin/bash
@@ -26,6 +22,6 @@ run:
     # gradle user to run build
     chown gradle:gradle -R ./sagan-repo
     cd sagan-repo
-    su gradle -c "./gradlew --console plain :sagan-site:build"
+    su gradle -c "./gradlew --console plain :sagan-renderer:build"
     cd ../
-    cp -R sagan-repo/sagan-site/build/* build
+    cp -R sagan-repo/sagan-renderer/build/* build

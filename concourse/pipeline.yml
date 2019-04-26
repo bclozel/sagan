@@ -6,7 +6,7 @@ resource_types:
     tag: latest
 
 resources:
-- name: sagan-site-repo
+- name: sagan-repo
   type: git
   source:
     uri: "https://github.com/spring-io/sagan.git"
@@ -24,14 +24,37 @@ resources:
     url: ((slack-webhook-url))
 
 jobs:
+- name: deploy-sagan-renderer
+  serial: true
+  plan:
+  - get: sagan-repo
+    trigger: true
+    params: { submodules: none }
+  - task: build-sagan-renderer
+    file: sagan-repo/concourse/tasks/build-sagan-renderer.yml
+    params:
+  - put: sagan-cf-production
+    params:
+      current_app_name: sagan-renderer
+      path: ./build/libs/sagan-renderer-1.0.0.BUILD-SNAPSHOT.jar
+      environment_variables:
+        SPRING_PROFILES_ACTIVE: production
+        SAGAN_RENDERER_GITHUB_TOKEN: ((sagan-github-access-token))
+      manifest: sagan-repo/concourse/manifests/sagan-renderer-production.yml
+  - put: slack-alert
+    params:
+      text: ":concourse-succeeded: <https://ci.spring.io/teams/${BUILD_TEAM_NAME}/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}|${BUILD_PIPELINE_NAME} ${BUILD_JOB_NAME} was successful!>"
+      silent: true
+      icon_emoji: ":concourse:"
+      username: concourse-ci
 - name: deploy-sagan-site
   serial: true
   plan:
-  - get: sagan-site-repo
+  - get: sagan-repo
     trigger: true
     params: { submodules: none }
   - task: build-sagan-site
-    file: sagan-site-repo/concourse/tasks/build-sagan-site.yml
+    file: sagan-repo/concourse/tasks/build-sagan-site.yml
     params:
       # JSPM github authentication is needed for the CI
       # otherwise install steps reach github API limitation
@@ -48,7 +71,7 @@ jobs:
         GITHUB_CLIENT_SECRET: ((sagan-github-clientsecret))
         GITHUB_ACCESS_TOKEN: ((sagan-github-access-token))
         WEBHOOK_ACCESS_TOKEN: ((sagan-webhook-access-token))
-      manifest: sagan-site-repo/concourse/manifests/sagan-site-production.yml
+      manifest: sagan-repo/concourse/manifests/sagan-site-production.yml
   - put: slack-alert
     params:
       text: ":concourse-succeeded: <https://ci.spring.io/teams/${BUILD_TEAM_NAME}/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}|${BUILD_PIPELINE_NAME} ${BUILD_JOB_NAME} was successful!>"
@@ -58,4 +81,5 @@ jobs:
 groups:
 - name: Deploy
   jobs:
+  - deploy-sagan-renderer
   - deploy-sagan-site
