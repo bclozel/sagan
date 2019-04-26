@@ -14,6 +14,9 @@ repositories {
 }
 
 dependencies {
+	implementation 'org.pegdown:pegdown:1.6.0'
+	implementation 'org.asciidoctor:asciidoctorj:1.6.2'
+	implementation 'org.jruby:jruby-complete:9.2.7.0'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	runtimeOnly 'org.springframework.boot:spring-boot-devtools'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
