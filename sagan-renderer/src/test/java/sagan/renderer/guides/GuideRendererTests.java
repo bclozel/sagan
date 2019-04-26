@@ -56,12 +56,27 @@ public class GuideRendererTests {
 		assertThat(result.getImages())
 				.anySatisfy(image -> {
 					assertThat(image.getName()).isEqualTo("spring.svg");
-				    assertThat(image.getEncodedContent()).contains("PHN2Z");
+					assertThat(image.getEncodedContent()).contains("PHN2Z");
 				})
 				.anySatisfy(image -> {
 					assertThat(image.getName()).isEqualTo("guides.png");
 					assertThat(image.getEncodedContent()).contains("iVBOR");
 				});
+	}
+
+	@Test
+	public void renderSampleGuideWithPwsMetadata() throws Exception {
+		given(this.githubClient.downloadRepositoryAsZipball("spring-guides", "gs-sample"))
+				.willReturn(readAsBytes("gs-sample-pws.zip"));
+		GuideContentResource result = this.renderer.render("gs-sample");
+
+		assertThat(result.getContent()).contains("<p>This is a sample guide.</p>")
+				.contains("<!-- rendered by Sagan Renderer Service -->");
+		assertThat(result.getTableOfContents()).contains("<li><a href=\"#_sample_guide_title\">Sample Guide title</a></li>");
+		assertThat(result.getPushToPwsMetadata())
+				.contains("repository: https://github.com/spring-guides/gs-rest-service.git")
+				.contains("directory: complete")
+				.contains("path: /greeting");
 	}
 
 	private byte[] readAsBytes(String path) throws IOException {

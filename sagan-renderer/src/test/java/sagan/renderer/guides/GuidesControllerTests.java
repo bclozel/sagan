@@ -2,6 +2,7 @@ package sagan.renderer.guides;
 
 import java.util.Arrays;
 
+import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import sagan.renderer.github.GithubClient;
@@ -133,11 +134,15 @@ public class GuidesControllerTests {
 	@Test
 	public void fetchGuideContent() throws Exception {
 		GuideContentResource content = new GuideContentResource("gs-rest-service", "content", "toc");
+		content.setPushToPwsMetadata("repository: https://github.com/spring-guides/gs-rest-service.git\n" +
+				"directory: complete\n" +
+				"path: /greeting");
 		given(this.guideRenderer.render("gs-rest-service")).willReturn(content);
 		this.mvc.perform(get("/guides/{guide}/content", "gs-rest-service"))
 				.andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(jsonPath("$.content").value("content"))
 				.andExpect(jsonPath("$.tableOfContents").value("toc"))
+				.andExpect(jsonPath("$.pushToPwsMetadata").value(Matchers.containsString("directory: complete")))
 				.andExpect(hasLink("self", "http://localhost/guides/gs-rest-service/content"))
 				.andExpect(hasLink("guide", "http://localhost/guides/gs-rest-service"));
 	}
