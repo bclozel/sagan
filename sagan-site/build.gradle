@@ -1,19 +1,11 @@
-buildscript {
-	repositories {
-		mavenCentral()
-	}
-	dependencies {
-		classpath 'org.springframework.boot:spring-boot-gradle-plugin:1.5.18.RELEASE'
-	}
-}
-
 plugins {
 	id 'java'
+	id 'org.springframework.boot' version '2.1.13.RELEASE'
 	id "org.asciidoctor.convert" version "1.5.3"
 	id "com.gorylenko.gradle-git-properties" version "1.5.2"
 }
 
-apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
 
 group = 'io.spring.sagan'
 version = "1.0.0.BUILD-SNAPSHOT"
@@ -24,16 +16,12 @@ repositories {
 }
 
 ext {
-	set('springCloudVersion', 'Edgware.SR5')
-}
-
-springBoot {
-    mainClass = 'sagan.SiteApplication'
+	set('springCloudVersion', 'Greenwich.SR5')
 }
 
 dependencyManagement {
 	imports {
-		mavenBom("org.springframework.cloud:spring-cloud-dependencies:Edgware.SR5")
+		mavenBom("org.springframework.cloud:spring-cloud-dependencies:Greenwich.SR5")
 	}
 }
 
@@ -51,16 +39,13 @@ dependencies {
 	compile 'org.springframework.boot:spring-boot-starter-data-jpa'
 	compile 'org.springframework.boot:spring-boot-starter-validation'
 
-	compile 'org.springframework.social:spring-social-github:1.0.0.M4'
 	compile 'org.springframework.boot:spring-boot-starter-security'
-
+	compile 'org.springframework.boot:spring-boot-starter-oauth2-client'
+	
 	// for use in on-the-fly database setup and migrations
-	compile 'org.flywaydb:flyway-core:4.2.0'
+	compile 'org.flywaydb:flyway-core'
 	compile 'org.apache.httpcomponents:httpclient'
 
-	// jackson, for JSON and XML serialization
-	compile "com.fasterxml.jackson.dataformat:jackson-dataformat-xml"
-	compile "org.codehaus.woodstox:woodstox-core-asl:4.4.1"
 	compile 'org.jsoup:jsoup:1.9.2'
 	compile 'joda-time:joda-time'
 	compile 'org.yaml:snakeyaml'
@@ -78,25 +63,25 @@ dependencies {
 	compile "org.springframework.boot:spring-boot-starter-thymeleaf"
 	compile 'org.thymeleaf.extras:thymeleaf-extras-java8time'
 	compile 'com.github.mxab.thymeleaf.extras:thymeleaf-extras-data-attribute'
-	compile 'org.thymeleaf.extras:thymeleaf-extras-springsecurity4'
+	// TODO: this is deprecated. Need to remove it and replace (https://github.com/ultraq/thymeleaf-layout-dialect/issues/95)
+	compile 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect'
+	compile 'org.thymeleaf.extras:thymeleaf-extras-springsecurity5'
 
-	compile 'org.springframework.cloud:spring-cloud-spring-service-connector'
-	compile 'org.springframework.cloud:spring-cloud-cloudfoundry-connector'
-
+	// for CloudFoundry service binding
+	compile "io.pivotal.cfenv:java-cfenv-boot:2.1.2.RELEASE"
+	
 	// datasource and connection pool dependencies
-	runtime 'org.postgresql:postgresql:9.4.1212'
+	runtime 'org.postgresql:postgresql'
 	runtime 'com.h2database:h2'
 
 	// for use of spring-test's MatcherAssertionErrors.*
 	testCompile 'org.springframework.boot:spring-boot-starter-test'
 
-    // nekohtml is required for thymeleaf's LEGACYHTML5 mode
-    runtime 'net.sourceforge.nekohtml:nekohtml'
-
     // for use in mocking http interactions
     testCompile "org.springframework.restdocs:spring-restdocs-mockmvc"
     testCompile "org.springframework.cloud:spring-cloud-contract-wiremock"
     testCompile "org.springframework.boot:spring-boot-starter-test"
+	testCompile "org.springframework.security:spring-security-test"
 
 }
 
