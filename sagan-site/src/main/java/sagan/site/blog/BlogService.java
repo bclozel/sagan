@@ -53,11 +53,8 @@ public class BlogService {
     // Query methods
 
     public Post getPost(Long postId) {
-        Post post = postRepository.findOne(postId);
-        if (post == null) {
-            throw new PostNotFoundException(postId);
-        }
-        return post;
+        return postRepository.findById(postId)
+				.orElseThrow(() -> new PostNotFoundException(postId));
     }
 
     public Post getPost(String title, Date createdAt) {
