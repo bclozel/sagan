@@ -4,7 +4,7 @@ applications:
   buildpack: java_buildpack
   instances: 2
   health-check-type: http
-  health-check-http-endpoint: /health
+  health-check-http-endpoint: /actuator/health
   memory: 2048M
   disk_quota: 1024M
   routes:
