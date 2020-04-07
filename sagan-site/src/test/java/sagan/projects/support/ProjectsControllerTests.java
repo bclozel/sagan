@@ -1,5 +1,13 @@
 package sagan.projects.support;
 
+import sagan.projects.Project;
+import sagan.projects.ProjectGroup;
+import sagan.projects.ProjectRelease;
+import sagan.site.guides.GettingStartedGuides;
+import sagan.site.guides.GuideHeader;
+import sagan.site.guides.Topicals;
+import sagan.site.guides.Tutorials;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -10,32 +18,25 @@ import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import sagan.projects.Project;
-import sagan.projects.ProjectGroup;
-import sagan.projects.ProjectRelease;
-import sagan.site.guides.GettingStartedGuides;
-import sagan.site.guides.GuideHeader;
-import sagan.site.guides.Topicals;
-import sagan.site.guides.Tutorials;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static sagan.projects.ProjectRelease.ReleaseStatus.GENERAL_AVAILABILITY;
-import static sagan.projects.ProjectRelease.ReleaseStatus.SNAPSHOT;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static sagan.projects.ProjectRelease.ReleaseStatus.*;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest(ProjectsController.class)
+@WebMvcTest(controllers=ProjectsController.class)
 @TestPropertySource(properties = "spring.profiles.active=standalone")
 public class ProjectsControllerTests {
 	@MockBean
@@ -49,6 +50,12 @@ public class ProjectsControllerTests {
 
 	@MockBean
 	private Topicals projectTopicalRepo;
+
+	@MockBean
+	private OAuth2UserService<?,?> userService;
+
+	@MockBean
+	private ClientRegistrationRepository registrationRepository;
 
 	private ProjectRelease currentRelease;
 
@@ -127,7 +134,8 @@ public class ProjectsControllerTests {
 				.andExpect(status().isOk())
 				.andExpect(model().attribute("selectedProject", this.springBoot))
 				.andExpect(model().attribute("projects", Matchers.contains(this.springBoot, this.springData)))
-				.andExpect(model().attribute("projectStackOverflow", "https://stackoverflow.com/questions/tagged/spring-boot"));
+				.andExpect(model().attribute("projectStackOverflow",
+						"https://stackoverflow.com/questions/tagged/spring-boot"));
 	}
 
 	@Test
@@ -136,7 +144,8 @@ public class ProjectsControllerTests {
 				.andExpect(status().isOk())
 				.andExpect(model().attribute("selectedProject", this.springData))
 				.andExpect(model().attribute("projects", Matchers.contains(this.springBoot, this.springData)))
-				.andExpect(model().attribute("projectStackOverflow", "https://stackoverflow.com/questions/tagged/spring-data+or+spring-data-commons"));
+				.andExpect(model().attribute("projectStackOverflow",
+						"https://stackoverflow.com/questions/tagged/spring-data+or+spring-data-commons"));
 	}
 
 	@Test
@@ -144,7 +153,8 @@ public class ProjectsControllerTests {
 		this.mvc.perform(get("/projects/spring-boot"))
 				.andExpect(status().isOk())
 				.andExpect(model().attribute("currentRelease", Optional.of(this.currentRelease)))
-				.andExpect(model().attribute("otherReleases", Matchers.hasItems(this.anotherCurrentRelease, this.snapshotRelease)));
+				.andExpect(model().attribute("otherReleases", Matchers.hasItems(this.anotherCurrentRelease,
+						this.snapshotRelease)));
 	}
 
 	@Test
@@ -166,8 +176,7 @@ public class ProjectsControllerTests {
 		this.mvc.perform(get("/projects"))
 				.andExpect(status().isOk())
 				.andExpect(model().attribute("groups", this.projectGroups))
-				.andExpect(model().attribute("featured", Matchers.contains(this.springBoot)))
-		;
+				.andExpect(model().attribute("featured", Matchers.contains(this.springBoot)));
 	}
 
 }
