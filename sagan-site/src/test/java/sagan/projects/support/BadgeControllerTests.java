@@ -28,6 +28,7 @@ import sagan.projects.Project;
 import sagan.projects.ProjectRelease;
 import sagan.projects.ProjectRelease.ReleaseStatus;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,9 +51,11 @@ public class BadgeControllerTests {
     private Project project;
     private List<ProjectRelease> releases = new ArrayList<>();
 
-    @Before
-    public void setUp() throws Exception {
+	public BadgeControllerTests() throws FileNotFoundException {
+	}
 
+	@Before
+    public void setUp() throws Exception {
         versionBadgeService.postConstruct();
         controller = new BadgeController(projectMetadataServiceMock, versionBadgeService);
         project = new Project("spring-data-redis", "Spring Data Redis", "http", "http", releases, "data");

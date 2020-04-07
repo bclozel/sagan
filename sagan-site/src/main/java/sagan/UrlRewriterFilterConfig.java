@@ -1,5 +1,7 @@
 package sagan;
 
+import javax.servlet.Filter;
+
 import sagan.support.TuckeyRewriteFilter;
 
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -14,8 +16,8 @@ public class UrlRewriterFilterConfig {
 
 	
 	@Bean
-	public FilterRegistrationBean rewriteFilterConfig() {
-		FilterRegistrationBean reg = new FilterRegistrationBean();
+	public FilterRegistrationBean<?> rewriteFilterConfig() {
+		FilterRegistrationBean<Filter> reg = new FilterRegistrationBean<>();
 		reg.setName(REWRITE_FILTER_NAME);
 		reg.setFilter(new TuckeyRewriteFilter());
 		reg.addInitParameter("confPath", REWRITE_FILTER_CONF_PATH);

@@ -27,8 +27,9 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  * Tests for {@link EventsCalendarService}
  */
 @RunWith(SpringRunner.class)
-@RestClientTest({EventsCalendarService.class, SiteProperties.class})
-@TestPropertySource(properties = "sagan.site.events.calendar-uri=http://example.org/ical")
+@RestClientTest(EventsCalendarService.class)
+//"spring.main.allow-bean-definition-overriding=true"
+@TestPropertySource(properties = {"sagan.site.events.calendar-uri=http://example.org/ical"})
 public class EventsCalendarServiceTests {
 
 	private static final MediaType TEXT_CALENDAR = MediaType.parseMediaType("text/calendar");

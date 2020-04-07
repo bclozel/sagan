@@ -16,6 +16,7 @@ import sagan.support.DateTestUtils;
 
 import org.springframework.test.util.ReflectionTestUtils;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.verify;
 import static org.mockito.Matchers.anyObject;
@@ -45,9 +46,7 @@ public class BlogService_ValidPostTests {
 
     @Before
     public void setup() {
-        given(dateFactory.now()).willReturn(now);
-
-        given(postRepository.save((Post) anyObject())).will(invocation -> {
+        given(postRepository.save((Post) any())).will(invocation -> {
             Post post = (Post) invocation.getArguments()[0];
             ReflectionTestUtils.setField(post, "id", 123L);
             return post;

@@ -1,5 +1,6 @@
 package sagan.projects.support;
 
+import org.mockito.junit.MockitoJUnitRunner;
 import sagan.projects.Project;
 import sagan.projects.ProjectRelease;
 import sagan.projects.ProjectRelease.ReleaseStatus;
@@ -14,14 +15,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 import sagan.site.blog.PostContentRenderer;
 
 import org.springframework.ui.ExtendedModelMap;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.mockito.Matchers.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -49,7 +49,6 @@ public class ProjectAdminControllerTests {
         releases.add(new ProjectRelease("1.2.3", ReleaseStatus.GENERAL_AVAILABILITY, false,
                 "http://example.com/1.2.3",
                 "http://example.com/1.2.3", "org.springframework", "spring-core"));
-        when(projectMetadataService.getProject("spring-framework")).thenReturn(project);
         List<Project> list = Arrays.asList(project);
         when(projectMetadataService.getProjects()).thenReturn(list);
         controller.list(model);

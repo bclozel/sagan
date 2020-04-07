@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ProjectMetadataService {
 
-	private static final Sort sortByDisplayOrderAndId = new Sort("displayOrder", "id");
+	private static final Sort sortByDisplayOrderAndId = Sort.by("displayOrder", "id");
 
     private ProjectMetadataRepository repository;
     private ProjectGroupRepository groupRepository;
@@ -45,7 +45,7 @@ public class ProjectMetadataService {
 	}
 
     public Project getProject(String id) {
-        return repository.findOne(id);
+        return repository.findById(id).orElse(null);
     }
 
     public Project save(Project project) {
@@ -53,7 +53,7 @@ public class ProjectMetadataService {
     }
 
     public void delete(String id) {
-        repository.delete(id);
+        repository.deleteById(id);
     }
 
     public List<ProjectGroup> getAllGroups() {

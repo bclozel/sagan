@@ -2,6 +2,7 @@ package sagan.projects.support;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -22,6 +23,7 @@ import sagan.projects.support.BadgeSvg.Path;
 
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+import org.springframework.util.ResourceUtils;
 
 /**
  * Service to generate SVG badges.
@@ -31,13 +33,16 @@ import org.springframework.util.Assert;
 @Service
 public class VersionBadgeService {
 
-    private final URL PRERELEASE_TEMPLATE = getClass().getResource("/badge/milestone.svg");
-    private final URL GENERAL_AVAILABILITY_TEMPLATE = getClass().getResource("/badge/release.svg");
-    private final URL SNAPSHOT_TEMPLATE = getClass().getResource("/badge/snapshot.svg");
-    private final URL VERDANA_FONT = getClass().getResource("/badge/Verdana.ttf");
+    private final URL PRERELEASE_TEMPLATE = ResourceUtils.getURL("classpath:badge/milestone.svg");
+    private final URL GENERAL_AVAILABILITY_TEMPLATE = ResourceUtils.getURL("classpath:badge/release.svg");
+    private final URL SNAPSHOT_TEMPLATE = ResourceUtils.getURL("classpath:badge/snapshot.svg");
+    private final URL VERDANA_FONT = ResourceUtils.getURL("classpath:badge/Verdana.ttf");
     private final BufferedImage DUMMY = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
     private Graphics graphics;
     private XBProjector xbProjector;
+
+	public VersionBadgeService() throws FileNotFoundException {
+	}
 
     @PostConstruct
     public void postConstruct() throws Exception {

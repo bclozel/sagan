@@ -1,10 +1,5 @@
 package sagan.blog.support;
 
-import sagan.blog.Post;
-import sagan.blog.PostBuilder;
-import sagan.support.DateFactory;
-import sagan.support.DateTestUtils;
-
 import java.text.ParseException;
 import java.util.Locale;
 
@@ -13,11 +8,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import sagan.blog.Post;
+import sagan.blog.PostBuilder;
+import sagan.support.DateFactory;
+import sagan.support.DateTestUtils;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.equalTo;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
 
 public class PostViewTests {
 
@@ -46,7 +43,7 @@ public class PostViewTests {
         post = PostBuilder.post().draft().unscheduled().build();
         postView = PostView.of(post, dateFactory);
 
-        assertThat(postView.getFormattedPublishDate(), equalTo("Unscheduled"));
+        assertThat(postView.getFormattedPublishDate()).isEqualTo("Unscheduled");
     }
 
     @Test
@@ -54,7 +51,7 @@ public class PostViewTests {
         post = PostBuilder.post().publishAt("2012-07-02 13:42").build();
         postView = PostView.of(post, dateFactory);
 
-        assertThat(postView.getFormattedPublishDate(), equalTo("July 02, 2012"));
+        assertThat(postView.getFormattedPublishDate()).isEqualTo("July 02, 2012");
     }
 
     @Test
@@ -63,7 +60,7 @@ public class PostViewTests {
         post = PostBuilder.post().id(123L).title("My Post").draft().build();
         postView = PostView.of(post, dateFactory);
 
-        assertThat(postView.getPath(), equalTo("/admin/blog/123-my-post"));
+        assertThat(postView.getPath()).isEqualTo("/admin/blog/123-my-post");
     }
 
     @Test
@@ -72,7 +69,7 @@ public class PostViewTests {
         post = PostBuilder.post().id(123L).title("My Post").publishAt("2012-07-05 13:42").build();
         postView = PostView.of(post, dateFactory);
 
-        assertThat(postView.getPath(), equalTo("/admin/blog/123-my-post"));
+        assertThat(postView.getPath()).isEqualTo("/admin/blog/123-my-post");
     }
 
     @Test
@@ -81,7 +78,7 @@ public class PostViewTests {
         post = PostBuilder.post().id(123L).title("My Post").publishAt("2012-07-01 13:42").build();
         postView = PostView.of(post, dateFactory);
 
-        assertThat(postView.getPath(), equalTo("/blog/2012/07/01/my-post"));
+        assertThat(postView.getPath()).isEqualTo("/blog/2012/07/01/my-post");
     }
 
     @Test
@@ -92,7 +89,7 @@ public class PostViewTests {
 
         postView = PostView.of(post, dateFactory);
 
-        assertThat(postView.showReadMore(), is(true));
+        assertThat(postView.showReadMore()).isTrue();
     }
 
     @Test
@@ -104,7 +101,7 @@ public class PostViewTests {
 
         postView = PostView.of(post, dateFactory);
 
-        assertThat(postView.showReadMore(), is(false));
+        assertThat(postView.showReadMore()).isFalse();
     }
 
 }

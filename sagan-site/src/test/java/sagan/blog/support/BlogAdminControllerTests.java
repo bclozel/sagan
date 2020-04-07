@@ -2,6 +2,8 @@ package sagan.blog.support;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+
+import org.mockito.junit.MockitoJUnitRunner;
 import sagan.blog.Post;
 import sagan.blog.PostBuilder;
 import sagan.blog.PostCategory;
@@ -21,7 +23,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -79,9 +80,9 @@ public class BlogAdminControllerTests {
                 Arrays.asList(new Post("published post", "body", PostCategory.ENGINEERING, PostFormat.MARKDOWN)),
                 PageableFactory.forDashboard(1), 1);
 
-        given(blogService.getPublishedPosts(anyObject())).willReturn(published);
-        given(blogService.getDraftPosts(anyObject())).willReturn(drafts);
-        given(blogService.getScheduledPosts(anyObject())).willReturn(scheduled);
+        given(blogService.getPublishedPosts(any())).willReturn(published);
+        given(blogService.getDraftPosts(any())).willReturn(drafts);
+        given(blogService.getScheduledPosts(any())).willReturn(scheduled);
 
         ExtendedModelMap model = new ExtendedModelMap();
         controller.dashboard(model, 1);
@@ -112,7 +113,7 @@ public class BlogAdminControllerTests {
         MemberProfile member = new MemberProfile();
         member.setUsername(username);
 
-        given(teamRepository.findById(12345L)).willReturn(member);
+        given(teamRepository.findByGithubId(12345L)).willReturn(member);
         PostForm postForm = new PostForm();
 
         given(blogService.addPost(eq(postForm), anyString())).willReturn(TEST_POST);
@@ -127,7 +128,7 @@ public class BlogAdminControllerTests {
         MemberProfile member = new MemberProfile();
         member.setUsername(username);
 
-        given(teamRepository.findById(12345L)).willReturn(member);
+        given(teamRepository.findByGithubId(12345L)).willReturn(member);
 
         PostForm postForm = new PostForm();
         postForm.setTitle("title");
@@ -148,7 +149,7 @@ public class BlogAdminControllerTests {
         MemberProfile member = new MemberProfile();
         member.setUsername(username);
 
-        given(teamRepository.findById(12345L)).willReturn(member);
+        given(teamRepository.findByGithubId(12345L)).willReturn(member);
 
         PostForm postForm = new PostForm();
         postForm.setTitle("title");

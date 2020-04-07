@@ -41,8 +41,6 @@ public class BlogService_UpdatePostTests {
 
     @Before
     public void setup() {
-        given(dateFactory.now()).willReturn(now);
-
         service = new BlogService(postRepository, postFormAdapter, dateFactory);
 
         post = PostBuilder.post().id(123L).publishAt(publishAt).build();
