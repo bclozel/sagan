@@ -48,8 +48,9 @@ jobs:
       current_app_name: sagan-renderer
       path: ./build/libs/sagan-renderer-1.0.0.BUILD-SNAPSHOT.jar
       environment_variables:
-        SPRING_PROFILES_ACTIVE: production
+        SPRING_PROFILES_ACTIVE: cloud,production
         SAGAN_RENDERER_GITHUB_TOKEN: ((sagan-github-access-token))
+        JBP_CONFIG_SPRING_AUTO_RECONFIGURATION: "{enabled:false}"
       manifest: sagan-renderer-repo/concourse/manifests/sagan-renderer-production.yml
   - put: slack-alert
     params:
@@ -71,14 +72,14 @@ jobs:
       current_app_name: sagan
       path: ./build/libs/sagan-site-1.0.0.BUILD-SNAPSHOT.jar
       environment_variables:
-        SPRING_PROFILES_ACTIVE: production
-        ELASTICSEARCH_INDEX: sagan-production
+        SPRING_PROFILES_ACTIVE: cloud,production
         ADMIN_PASSWORD: ((sagan-admin-password))
         GITHUB_CLIENT_ID: ((sagan-github-clientid))
         GITHUB_CLIENT_SECRET: ((sagan-github-clientsecret))
         GITHUB_ACCESS_TOKEN: ((sagan-github-access-token))
         WEBHOOK_ACCESS_TOKEN: ((sagan-webhook-access-token))
         SAGAN_SITE_EVENTS_CALENDAR_URI: ((sagan-events-calendar-uri))
+        JBP_CONFIG_SPRING_AUTO_RECONFIGURATION: "{enabled:false}"
       manifest: sagan-site-repo/concourse/manifests/sagan-site-production.yml
   - put: slack-alert
     params:
