@@ -57,14 +57,16 @@
                             <span class="icon has-text-success">
                               <i class="fas fa-user"></i>
                             </span>
-                            <span sec:authentication="credentials">Emily</span>
+                            <span sec:authentication="principal.attributes['name']">Emily</span>
                         </a>
-                        <a class="button is-white" th:href="@{/signout}">
-                            <span class="icon has-text-danger">
+                        <form th:action="@{/logout}" method="post">
+                            <button class="button is-white" type="submit">
+                                <span class="icon has-text-danger">
                               <i class="fas fa-sign-out-alt"></i>
                             </span>
-                            <span>Log out</span>
-                        </a>
+                                <span>Sign out</span>
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
