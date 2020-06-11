@@ -1,12 +1,13 @@
-package sagan.site.webapi.project;
+package sagan.site.webapi.generation;
 
-import java.util.Arrays;
+import java.time.LocalDate;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.modelmapper.ModelMapper;
 import sagan.site.projects.Project;
+import sagan.site.projects.ProjectGeneration;
 import sagan.site.projects.ProjectMetadataService;
 import sagan.site.projects.SupportStatus;
 import sagan.site.webapi.WebApiTest;
@@ -15,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.restdocs.hypermedia.LinkDescriptor;
 import org.springframework.restdocs.payload.FieldDescriptor;
@@ -24,6 +24,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.eq;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
@@ -36,11 +37,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Tests for {@link ProjectMetadataController}
+ * Tests for {@link GenerationMetadataController}
  */
 @RunWith(SpringRunner.class)
-@WebApiTest(ProjectMetadataController.class)
-public class ProjectMetadataControllerTests {
+@WebApiTest(GenerationMetadataController.class)
+public class GenerationMetadataControllerTests {
 
 	@Autowired
 	private MockMvc mvc;
@@ -50,70 +51,70 @@ public class ProjectMetadataControllerTests {
 
 	private Project springBoot;
 
-	private Project springData;
-
-	private Project springDataES;
-
 	@Before
 	public void setup() {
 		this.springBoot = new Project("spring-boot", "Spring Boot");
 		this.springBoot.setRepoUrl("https://github.com/spring-projects/spring-boot");
 		this.springBoot.setStatus(SupportStatus.ACTIVE);
-		this.springData = new Project("spring-data", "Spring Data");
-		this.springData.setRepoUrl("https://github.com/spring-projects/spring-data");
-		this.springData.setStatus(SupportStatus.ACTIVE);
-		this.springDataES = new Project("spring-data-elasticsearch", "Spring Data Elasticsearch");
-		this.springDataES.setRepoUrl("https://github.com/spring-projects/spring-data-elasticsearch");
-		this.springDataES.setStatus(SupportStatus.ACTIVE);
-		this.springDataES.setParentProject(this.springData);
+		ProjectGeneration twoOneX = this.springBoot.addGeneration("2.1.x", LocalDate.parse("2019-01-01"));
+		twoOneX.setOssSupportEnforcedEndDate(LocalDate.parse("2020-01-01"));
+		twoOneX.setCommercialSupportEnforcedEndDate(LocalDate.parse("2021-01-01"));
+		ProjectGeneration twoTwoX = this.springBoot.addGeneration("2.2.x", LocalDate.parse("2020-01-01"));
+		twoTwoX.setOssSupportEnforcedEndDate(LocalDate.parse("2021-01-01"));
+		twoTwoX.setCommercialSupportEnforcedEndDate(LocalDate.parse("2022-01-01"));
 	}
 
 	@Test
-	public void listProjects() throws Exception {
-		given(this.metadataService.fetchAllProjects()).willReturn(Arrays.asList(this.springBoot, this.springData, this.springDataES));
-		this.mvc.perform(get("/api/projects").accept(MediaTypes.HAL_JSON))
+	public void listGenerations() throws Exception {
+		given(this.metadataService.fetchFullProject(eq("spring-boot"))).willReturn(this.springBoot);
+		this.mvc.perform(get("/api/projects/spring-boot/generations").accept(MediaTypes.HAL_JSON))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$._embedded.projects.length()").value("3"))
+				.andExpect(jsonPath("$._embedded.generations.length()").value("2"))
 				.andDo(document("{method-name}", preprocessResponse(prettyPrint()),
-						responseFields(fieldWithPath("_embedded.projects").description("An array of Projects"))
-								.andWithPrefix("_embedded.projects[]", projectPayload())));
+						responseFields(fieldWithPath("_embedded.generations").description("An array of Project Generations"))
+								.andWithPrefix("_embedded.generations[]", generationPayload())
+								.and(fieldWithPath("_links").description("Links to other resources")),
+						links(generationsLinks())));
 	}
 
 	@Test
-	public void showProject() throws Exception {
+	public void showGeneration() throws Exception {
 		given(this.metadataService.fetchFullProject("spring-boot")).willReturn(this.springBoot);
-		this.mvc.perform(get("/api/projects/spring-boot").accept(MediaTypes.HAL_JSON))
+		this.mvc.perform(get("/api/projects/spring-boot/generations/2.1.x").accept(MediaTypes.HAL_JSON))
 				.andExpect(status().isOk())
 				.andDo(document("{method-name}", preprocessResponse(prettyPrint()),
-						responseFields(projectPayload()), links(projectLinks())));
+						responseFields(generationPayload()), links(generationLinks())));
 	}
 
-	FieldDescriptor[] projectPayload() {
+	FieldDescriptor[] generationPayload() {
 		return new FieldDescriptor[] {
-				fieldWithPath("name").type(JsonFieldType.STRING).description("Project Name"),
-				fieldWithPath("slug").type(JsonFieldType.STRING).description("URL-friendly name of the project"),
-				fieldWithPath("repositoryUrl").type(JsonFieldType.STRING).description("URL for the source repository"),
-				fieldWithPath("status").type(JsonFieldType.STRING).description("<<project-status, Support status>> of the project"),
+				fieldWithPath("name").type(JsonFieldType.STRING).description("Generation Name"),
+				fieldWithPath("initialReleaseDate").type(JsonFieldType.STRING).description("Date of the first release for this Generation"),
+				fieldWithPath("ossSupportEndDate").type(JsonFieldType.STRING).description("End date of the OSS support"),
+				fieldWithPath("commercialSupportEndDate").type(JsonFieldType.STRING).description("End date of the Commercial support"),
 				fieldWithPath("_links").description("Links to other resources")
 		};
 	}
 
-	LinkDescriptor[] projectLinks() {
+	LinkDescriptor generationsLinks() {
+		return linkWithRel("project").description("Link to Project");
+	}
+
+	LinkDescriptor[] generationLinks() {
 		return new LinkDescriptor[] {
 				linkWithRel("self").description("Canonical self link"),
-				linkWithRel("parent").optional().description("Link to <<project, parent Project>>, if any"),
-				linkWithRel("generations").optional().description("Link to <<generation, Generations>>"),
-				linkWithRel("releases").optional().description("Link to <<release, Releases>>")
+				linkWithRel("project").description("Link to Project")
 		};
 	}
 
 
 	@Configuration
-	static class ProjectMetadataTestConfig {
+	static class GenerationMetadataTestConfig {
 
 		@Bean
-		public ProjectMetadataAssembler projectMetadataAssembler(EntityLinks entityLinks, ModelMapper modelMapper) {
-			return new ProjectMetadataAssembler(entityLinks, modelMapper);
+		public GenerationMetadataAssembler generationMetadataAssembler(ModelMapper modelMapper) {
+			return new GenerationMetadataAssembler(modelMapper);
 		}
 	}
+
 }

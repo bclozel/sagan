@@ -14,7 +14,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 /**
- *
+ * Map {@link Project} to {@link ProjectMetadata}, while also adding links to related resources.
  */
 @Component
 class ProjectMetadataAssembler extends ResourceAssemblerSupport<Project, ProjectMetadata> {

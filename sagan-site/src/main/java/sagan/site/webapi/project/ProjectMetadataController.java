@@ -15,12 +15,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- *
+ * Expose {@link ProjectMetadata} resources.
  */
 @RestController
 @RequestMapping(path = "/api/projects", produces = MediaTypes.HAL_JSON_VALUE)
 @ExposesResourceFor(ProjectMetadata.class)
-class ProjectMetadataController {
+public class ProjectMetadataController {
 
 	private final ProjectMetadataService metadataService;
 

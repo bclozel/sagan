@@ -5,10 +5,9 @@ import java.util.List;
 import sagan.site.projects.Project;
 import sagan.site.projects.ProjectGeneration;
 import sagan.site.projects.ProjectMetadataService;
-import sagan.site.webapi.project.ProjectMetadata;
+import sagan.site.webapi.project.ProjectMetadataController;
 import sagan.support.ResourceNotFoundException;
 
-import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.Resource;
@@ -17,6 +16,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 /**
  *
@@ -28,13 +30,10 @@ public class GenerationMetadataController {
 
 	private final ProjectMetadataService metadataService;
 
-	private final EntityLinks entityLinks;
-
 	private final GenerationMetadataAssembler resourceAssembler;
 
-	public GenerationMetadataController(ProjectMetadataService metadataService, EntityLinks entityLinks, GenerationMetadataAssembler resourceAssembler) {
+	public GenerationMetadataController(ProjectMetadataService metadataService, GenerationMetadataAssembler resourceAssembler) {
 		this.metadataService = metadataService;
-		this.entityLinks = entityLinks;
 		this.resourceAssembler = resourceAssembler;
 	}
 
@@ -46,7 +45,7 @@ public class GenerationMetadataController {
 		}
 		List<GenerationMetadata> generationMetadata = this.resourceAssembler.toResources(project.getGenerations());
 		Resources<GenerationMetadata> resources = new Resources<>(generationMetadata);
-		resources.add(this.entityLinks.linkToSingleResource(ProjectMetadata.class, projectId).withRel("project"));
+		resources.add(linkTo(methodOn(ProjectMetadataController.class).showProject(projectId)).withRel("project"));
 		return resources;
 	}
 

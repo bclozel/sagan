@@ -8,6 +8,7 @@ import sagan.site.projects.Project;
 import sagan.site.projects.ProjectMetadataService;
 import sagan.site.projects.Release;
 import sagan.site.projects.Version;
+import sagan.site.webapi.project.ProjectMetadataController;
 import sagan.support.ResourceNotFoundException;
 
 import org.springframework.hateoas.ExposesResourceFor;
@@ -16,6 +17,7 @@ import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,7 +29,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 /**
- *
+ * Expose {@link ReleaseMetadata} resources.
  */
 @RestController
 @RequestMapping(path = "/api/", produces = MediaTypes.HAL_JSON_VALUE)
@@ -53,6 +55,7 @@ public class ReleaseMetadataController {
 		Resources<ReleaseMetadata> resources = new Resources<>(releaseMetadata);
 		project.getCurrentRelease().ifPresent(r ->
 				resources.add(linkTo(methodOn(ReleaseMetadataController.class).showCurrentRelease(project.getId())).withRel("current")));
+		resources.add(linkTo(methodOn(ProjectMetadataController.class).showProject(project.getId())).withRel("project"));
 		return resources;
 	}
 
@@ -66,11 +69,7 @@ public class ReleaseMetadataController {
 		if (project.findRelease(Version.of(input.getVersion())).isPresent()) {
 			throw new InvalidReleaseException("Release already present: " + input.getVersion());
 		}
-		if (input.isCurrent() && currentRelease.isPresent()) {
-			throw new InvalidReleaseException("Current version already exists: " + currentRelease.get().getVersion().toString());
-		}
 		Release newRelease = project.addRelease(Version.of(input.getVersion()));
-		newRelease.setCurrent(input.isCurrent());
 		newRelease.setApiDocUrl(input.getApiDocUrl());
 		newRelease.setRefDocUrl(input.getReferenceDocUrl());
 		URI newReleaseURI = linkTo(methodOn(ReleaseMetadataController.class).showRelease(project.getId(), input.getVersion())).toUri();
@@ -88,6 +87,7 @@ public class ReleaseMetadataController {
 		return new Resource(releaseMetadata);
 	}
 
+
 	@GetMapping("/projects/{projectId}/releases/{version}")
 	public Resource<ReleaseMetadata> showRelease(@PathVariable String projectId, @PathVariable String version) {
 		Release release = this.metadataService.findRelease(projectId, Version.of(version));
@@ -98,4 +98,14 @@ public class ReleaseMetadataController {
 		return new Resource(releaseMetadata);
 	}
 
+	@DeleteMapping("/projects/{projectId}/releases/{version}")
+	public ResponseEntity<String> deleteRelease(@PathVariable String projectId, @PathVariable String version) {
+		Release release = this.metadataService.findRelease(projectId, Version.of(version));
+		if (release == null) {
+			throw new ResourceNotFoundException("Could not find release for project: " + projectId + " and version: " + version);
+		}
+		release.getProject().removeRelease(release.getVersion());
+		this.metadataService.save(release.getProject());
+		return ResponseEntity.noContent().build();
+	}
 }

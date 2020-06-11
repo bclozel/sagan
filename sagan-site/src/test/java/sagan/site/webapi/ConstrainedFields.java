@@ -11,6 +11,10 @@ public class ConstrainedFields {
 
 	private final ConstraintDescriptions constraintDescriptions;
 
+	public static ConstrainedFields constraintsOn(Class<?> input) {
+		return new ConstrainedFields(input);
+	}
+
 	public ConstrainedFields(Class<?> input) {
 		this.constraintDescriptions = new ConstraintDescriptions(input);
 	}
@@ -20,5 +24,4 @@ public class ConstrainedFields {
 				.collectionToDelimitedString(this.constraintDescriptions
 						.descriptionsForProperty(path), ". ")));
 	}
-
 }
